@@ -1,6 +1,10 @@
 import axios from "axios";
 
 const postAPI = axios.create({});
+// 새로고침하더라도 토큰이 유지된다.
+if(localStorage.getItem('token')){
+  postAPI.defaults.headers['Authorization'] = localStorage.getItem('token');
+}
 
 const rootEl = document.querySelector('.root');
 const templates = {
@@ -22,6 +26,12 @@ async function indexPage() {
 
   listfragment.querySelector('.post-list__login-btn').addEventListener('click', e=>{
     loginPage()
+  });
+
+  listfragment.querySelector('.post-list__logout-btn').addEventListener('click', e=>{
+    localStorage.removeItem('token');
+   delete postAPI.defaults.headers['Authorization'];
+   indexPage();
   })
 
   res.data.forEach(post => {
