@@ -14,6 +14,7 @@ const templates = {
   postItem: document.querySelector("#post-item").content,
   postContent: document.querySelector('#post-content').content,
   login: document.querySelector('#login').content,
+  postform: document.querySelector('#post-form').content,
 };
 
 // 중복 코드있으면 함수로 따로 뺴서 사용하는게 좋다
@@ -35,6 +36,10 @@ async function indexPage() {
    delete postAPI.defaults.headers['Authorization'];
    rootEl.classList.remove('root--authed');
    indexPage();
+  })
+
+  listfragment.querySelector('.post-list__new-post-btn').addEventListener('click', e=>{
+    postFormpage()
   })
 
   res.data.forEach(post => {
@@ -76,6 +81,27 @@ async function loginPage(){
     indexPage();
   })
   render(fragment)
+}
+
+async function postFormpage(){
+  const fragment = document.importNode(templates.postform, true);
+  fragment.querySelector('.post-form__back-btn').addEventListener('click', e=>{
+    e.preventDefault();
+    indexPage();
+  })
+
+  fragment.querySelector('.post-form').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const payload = {
+      title: e.target.elements.title.value,
+      body: e.target.elements.body.value,
+    };
+    const res = await postAPI.post('http://localhost:3000/posts', payload);
+    console.log(res.data.id)
+    postContentPage(res.data.id)
+  })
+
+  render(fragment);
 }
 
 indexPage()
