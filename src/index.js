@@ -73,7 +73,9 @@ async function indexPage() {
 }
 // 포스트페이지
 async function postContentPage(postId) {
+  rootEl.classList.add('root--loading');
   const res = await postAPI.get(`/posts/${postId}`);
+  rootEl.classList.remove('root--loading');
   const fragment = document.importNode(templates.postContent, true);
   fragment.querySelector(".post-content__title").textContent = res.data.title;
   fragment.querySelector(".post-content__body").textContent = res.data.body;
@@ -84,11 +86,22 @@ async function postContentPage(postId) {
     //댓글목록
     if(localStorage.getItem('token')) {
       const commentsFargment = document.importNode(templates.comments, true);
+      rootEl.classList.add('root--loading');
       const commentsRes = await postAPI.get(`/posts/${postId}/comments`);
+      rootEl.classList.remove('root--loading');
       commentsRes.data.forEach(comment => {
         const ItemFragment = document.importNode(templates.commentItem, true);
-        ItemFragment.querySelector(".comment-item__body").textContent = comment.body;
+        const bodyEl = ItemFragment.querySelector(".comment-item__body");
+        const removeButtonEl = ItemFragment.querySelector(".comment-item__remove-btn");
+        bodyEl.textContent = comment.body;
         commentsFargment.querySelector(".comments__list").appendChild(ItemFragment);
+        removeButtonEl.addEventListener('click',async e=>{
+         //p태그와 button 태그삭제
+         bodyEl.remove();
+         removeButtonEl.remove();
+         // delete 요청 보내기
+         const res = await postAPI.delete(`/comments/${comment.id}`)
+       })
       });
       const formEl = commentsFargment.querySelector('.comments__form');
       formEl.addEventListener('submit', async e=>{
@@ -98,7 +111,7 @@ async function postContentPage(postId) {
         }
         const res = await postAPI.post(`/posts/${postId}/comments`, payload)
         postContentPage(postId)
-      })
+      });
       fragment.appendChild(commentsFargment);
     };
   render(fragment);
@@ -114,7 +127,9 @@ async function loginPage() {
       password: e.target.elements.password.value
     };
     e.preventDefault();
+    rootEl.classList.add('root--loading');
     const res = await postAPI.post("/users/login", payload);
+    rootEl.classList.remove('root--loading');
     login(res.data.token);
     indexPage();
   });
@@ -136,7 +151,9 @@ async function postFormPage() {
       title: e.target.elements.title.value,
       body: e.target.elements.body.value
     };
+    rootEl.classList.add('root--loading');
     const res = await postAPI.post("/posts", payload);
+    rootEl.classList.remove('root--loading');
     console.log(res);
     postContentPage(res.data.id);
   });
