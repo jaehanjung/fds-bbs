@@ -32,9 +32,9 @@ function render(fragment) {
   rootEl.textContent = "";
   rootEl.appendChild(fragment);
 }
-
+// 메인페이지
 async function indexPage() {
-  const res = await postAPI.get("/posts");
+  const res = await postAPI.get("/posts?_expand=user");
   const listFragment = document.importNode(templates.postList, true);
 
   listFragment
@@ -58,6 +58,7 @@ async function indexPage() {
 
   res.data.forEach(post => {
     const fragment = document.importNode(templates.postItem, true);
+    fragment.querySelector('.post-item__author').textContent = post.user.username
     const pEl = fragment.querySelector(".post-item__title");
     pEl.textContent = post.title;
     pEl.addEventListener("click", e => {
@@ -68,7 +69,7 @@ async function indexPage() {
 
   render(listFragment);
 }
-
+// 포스트페이지
 async function postContentPage(postId) {
   const res = await postAPI.get(`/posts/${postId}`);
   const fragment = document.importNode(templates.postContent, true);
@@ -78,7 +79,7 @@ async function postContentPage(postId) {
     indexPage();
     });
 
-
+    //댓글목록
     if(localStorage.getItem('token')) {
       const commentsFargment = document.importNode(templates.comments, true);
       const commentsRes = await postAPI.get(`/posts/${postId}/comments`);
