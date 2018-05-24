@@ -88,8 +88,17 @@ async function postContentPage(postId) {
         ItemFragment.querySelector(".comment-item__body").textContent = comment.body;
         commentsFargment.querySelector(".comments__list").appendChild(ItemFragment);
       });
+      const formEl = commentsFargment.querySelector('.comments__form');
+      formEl.addEventListener('submit', async e=>{
+        e.preventDefault();
+        const payload = {
+          body: e.target.elements.body.value
+        }
+        const res = await postAPI.post(`/posts/${postId}/comments`, payload)
+        postContentPage(postId)
+      })
       fragment.appendChild(commentsFargment);
-    }
+    };
   render(fragment);
 }
 
